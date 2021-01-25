@@ -7,5 +7,9 @@ extern "C" void _start(BootInfo* bootInfo){
 
     GlobalRenderer->Print("Kernel Initialized Successfully");
 
+    while(true){
+        ProcessMousePacket();
+    }
+
     while(true);
 }
