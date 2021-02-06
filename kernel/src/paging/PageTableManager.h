@@ -7,3 +7,5 @@ class PageTableManager {
     PageTable* PML4;
     void MapMemory(void* virtualMemory, void* physicalMemory);
 };
+
+extern PageTableManager g_PageTableManager;

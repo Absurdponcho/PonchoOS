@@ -7,6 +7,9 @@ extern "C" void _start(BootInfo* bootInfo){
 
     GlobalRenderer->Print("Kernel Initialized Successfully");
 
+    GlobalRenderer->Next();
+    GlobalRenderer->Print(to_hstring((uint64_t)bootInfo->rsdp));  
+
     
 
     while(true){
