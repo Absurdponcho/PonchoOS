@@ -13,7 +13,7 @@ namespace ACPI{
                 {
                     break;
                 }
-                if (t == 3) return newSDTHeader;
+                if (i == 3) return newSDTHeader;
             }
         }
         return 0;

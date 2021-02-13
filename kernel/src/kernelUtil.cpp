@@ -67,10 +67,6 @@ void PrepareACPI(BootInfo* bootInfo){
     
     ACPI::MCFGHeader* mcfg = (ACPI::MCFGHeader*)ACPI::FindTable(xsdt, (char*)"MCFG");
 
-    // for (int t = 0; t < 4; t++){
-    //     GlobalRenderer->PutChar(mcfg->Header.Signature[t]);
-    // }
-
     PCI::EnumeratePCI(mcfg);
 }
 
