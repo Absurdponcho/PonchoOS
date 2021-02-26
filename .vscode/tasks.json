@@ -1,0 +1,47 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "cd kernel && make kernel buildimg"
+        },
+        {
+            "label": "Run",
+            "type": "shell",
+            "command": "powershell.exe \"Start-Process ./kernel/run.bat\""
+        },
+        {
+            "label": "DebugRun",
+            "type": "shell",
+            "command": "powershell.exe \"Start-Process ./kernel/runDebug.bat\""
+        },
+        {
+            "label": "Debug",
+            "type": "shell",
+            "command": "gdb ${workspaceFolder}/kernel/bin/kernel.elf && target remote localhost:1234"
+        },
+        {
+            "label": "Build and Debug",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build",
+                "DebugRun",
+                "Debug"
+            ]
+        },
+        {
+            "label": "Build and Run",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build",
+                "Run"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
