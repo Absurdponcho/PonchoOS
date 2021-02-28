@@ -2,6 +2,7 @@
 #include "../panic.h"
 #include "../IO.h"
 #include "../userinput/keyboard.h"
+#include "../scheduling/pit/pit.h"
 
 __attribute__((interrupt)) void PageFault_Handler(interrupt_frame* frame){
     Panic("Page Fault Detected");
@@ -17,6 +18,8 @@ __attribute__((interrupt)) void GPFault_Handler(interrupt_frame* frame){
     Panic("General Protection Fault Detected");
     while(true);
 }
+
+
 
 __attribute__((interrupt)) void KeyboardInt_Handler(interrupt_frame* frame){
     uint8_t scancode = inb(0x60);
@@ -35,6 +38,10 @@ __attribute__((interrupt)) void MouseInt_Handler(interrupt_frame* frame){
     PIC_EndSlave();
 }
 
+__attribute__((interrupt)) void PITInt_Handler(interrupt_frame* frame){
+    PIT::Tick();
+    PIC_EndMaster();
+}
 
 void PIC_EndMaster(){
     outb(PIC1_COMMAND, PIC_EOI);

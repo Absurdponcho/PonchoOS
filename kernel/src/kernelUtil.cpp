@@ -57,6 +57,7 @@ void PrepareInterrupts(){
     SetIDTGate((void*)GPFault_Handler, 0xD, IDT_TA_InterruptGate, 0x08);
     SetIDTGate((void*)KeyboardInt_Handler, 0x21, IDT_TA_InterruptGate, 0x08);
     SetIDTGate((void*)MouseInt_Handler, 0x2C, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)PITInt_Handler, 0x20, IDT_TA_InterruptGate, 0x08);
  
     asm ("lidt %0" : : "m" (idtr));
 
@@ -93,7 +94,7 @@ KernelInfo InitializeKernel(BootInfo* bootInfo){
 
     PrepareACPI(bootInfo);
 
-    outb(PIC1_DATA, 0b11111001);
+    outb(PIC1_DATA, 0b11111000);
     outb(PIC2_DATA, 0b11101111);
 
     asm ("sti");
