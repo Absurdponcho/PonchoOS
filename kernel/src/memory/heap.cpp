@@ -113,9 +113,11 @@ void HeapSegHdr::CombineForward(){
         next->next->last = this;
     }
 
-    next = next->next;
+    
 
     length = length + next->length + sizeof(HeapSegHdr);
+
+    next = next->next;
 }
 
 void HeapSegHdr::CombineBackward(){

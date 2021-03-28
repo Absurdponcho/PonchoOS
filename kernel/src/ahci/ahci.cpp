@@ -106,6 +106,66 @@ namespace AHCI{
         hbaPort->cmdSts |= HBA_PxCMD_ST;
     }
 
+    bool Port::Read(uint64_t sector, uint32_t sectorCount, void* buffer){
+        uint32_t sectorL = (uint32_t) sector;
+        uint32_t sectorH = (uint32_t) (sector >> 32);
+
+        hbaPort->interruptStatus = (uint32_t)-1; // Clear pending interrupt bits
+
+        HBACommandHeader* cmdHeader = (HBACommandHeader*)hbaPort->commandListBase;
+        cmdHeader->commandFISLength = sizeof(FIS_REG_H2D)/ sizeof(uint32_t); //command FIS size;
+        cmdHeader->write = 0; //this is a read
+        cmdHeader->prdtLength = 1;
+
+        HBACommandTable* commandTable = (HBACommandTable*)(cmdHeader->commandTableBaseAddress);
+        memset(commandTable, 0, sizeof(HBACommandTable) + (cmdHeader->prdtLength-1)*sizeof(HBAPRDTEntry));
+
+        commandTable->prdtEntry[0].dataBaseAddress = (uint32_t)(uint64_t)buffer;
+        commandTable->prdtEntry[0].dataBaseAddressUpper = (uint32_t)((uint64_t)buffer >> 32);
+        commandTable->prdtEntry[0].byteCount = (sectorCount<<9)-1; // 512 bytes per sector
+        commandTable->prdtEntry[0].interruptOnCompletion = 1;
+
+        FIS_REG_H2D* cmdFIS = (FIS_REG_H2D*)(&commandTable->commandFIS);
+
+        cmdFIS->fisType = FIS_TYPE_REG_H2D;
+        cmdFIS->commandControl = 1; // command
+        cmdFIS->command = ATA_CMD_READ_DMA_EX;
+
+        cmdFIS->lba0 = (uint8_t)sectorL;
+        cmdFIS->lba1 = (uint8_t)(sectorL >> 8);
+        cmdFIS->lba2 = (uint8_t)(sectorL >> 16);
+        cmdFIS->lba3 = (uint8_t)sectorH;
+        cmdFIS->lba4 = (uint8_t)(sectorH >> 8);
+        cmdFIS->lba4 = (uint8_t)(sectorH >> 16);
+
+        cmdFIS->deviceRegister = 1<<6; //LBA mode
+
+        cmdFIS->countLow = sectorCount & 0xFF;
+        cmdFIS->countHigh = (sectorCount >> 8) & 0xFF;
+
+        uint64_t spin = 0;
+
+        while ((hbaPort->taskFileData & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000){
+            spin ++;
+        }
+        if (spin == 1000000) {
+            return false;
+        }
+
+        hbaPort->commandIssue = 1;
+
+        while (true){
+
+            if((hbaPort->commandIssue == 0)) break;
+            if(hbaPort->interruptStatus & HBA_PxIS_TFES)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     AHCIDriver::AHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress){
         this->PCIBaseAddress = pciBaseAddress;
         GlobalRenderer->Print("AHCI Driver instance initialized");
@@ -120,6 +180,15 @@ namespace AHCI{
             Port* port = ports[i];
 
             port->Configure();
+
+            port->buffer = (uint8_t*)GlobalAllocator.RequestPage();
+            memset(port->buffer, 0, 0x1000);
+
+            port->Read(0, 4, port->buffer);
+            for (int t = 0; t < 1024; t++){
+                GlobalRenderer->PutChar(port->buffer[t]);
+            }
+            GlobalRenderer->Next();
         }
     }
 
