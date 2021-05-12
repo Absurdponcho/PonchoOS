@@ -2,7 +2,7 @@
 
 char uintTo_StringOutput[128];
 const char* to_string(uint64_t value){
-    uint8_t size;
+    uint8_t size = 0;
     uint64_t sizeTest = value;
     while (sizeTest / 10 > 0){
         sizeTest /= 10;
@@ -100,7 +100,7 @@ const char* to_string(int64_t value){
         intTo_StringOutput[0] = '-';
     }
 
-    uint8_t size;
+    uint8_t size = 0;
     uint64_t sizeTest = value;
     while (sizeTest / 10 > 0){
         sizeTest /= 10;
