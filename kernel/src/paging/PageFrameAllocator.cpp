@@ -6,6 +6,37 @@ uint64_t usedMemory;
 bool Initialized = false;
 PageFrameAllocator GlobalAllocator;
 
+//moving the functions of the Bitmap class to be inside of this object file 
+//seems to prevent the whole operating system from crashing when you use malloc();
+//I dont know why this works but it be like that sometimes
+bool Bitmap::operator[](uint64_t index){
+    return Get(index);
+}
+
+bool Bitmap::Get(uint64_t index){
+    if (index > Size * 8) return false;
+    uint64_t byteIndex = index / 8;
+    uint8_t bitIndex = index % 8;
+    uint8_t bitIndexer = 0b10000000 >> bitIndex;
+    if ((Buffer[byteIndex] & bitIndexer) > 0){
+        return true;
+    }
+    return false;
+}
+
+bool Bitmap::Set(uint64_t index, bool value){
+    if (index > Size * 8) return false;
+    uint64_t byteIndex = index / 8;
+    uint8_t bitIndex = index % 8;
+    uint8_t bitIndexer = 0b10000000 >> bitIndex;
+    Buffer[byteIndex] &= ~bitIndexer;
+    if (value){
+        Buffer[byteIndex] |= bitIndexer;
+    }
+    return true;
+}
+//end of Bitmap function definitions
+
 void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* mMap, size_t mMapSize, size_t mMapDescSize){
     if (Initialized) return;
 
