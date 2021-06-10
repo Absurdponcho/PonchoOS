@@ -5,7 +5,6 @@
 #include "cstr.h"
 #include "efiMemory.h"
 #include "memory.h"
-#include "Bitmap.h"
 #include "paging/PageFrameAllocator.h"
 #include "paging/PageMapIndexer.h"
 #include "paging/paging.h"
