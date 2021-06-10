@@ -4,6 +4,7 @@
 #include "BasicRenderer.h"
 #include "cstr.h"
 #include "efiMemory.h"
+#include "memory.h"
 #include "paging/PageFrameAllocator.h"
 #include "paging/PageMapIndexer.h"
 #include "paging/paging.h"
