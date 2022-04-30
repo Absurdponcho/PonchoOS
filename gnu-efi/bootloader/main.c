@@ -232,9 +232,15 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	{
 		
 		SystemTable->BootServices->GetMemoryMap(&MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, MapSize, (void**)&Map);
-		SystemTable->BootServices->GetMemoryMap(&MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
-
+        while (1) {
+            SystemTable->BootServices->AllocatePool(EfiLoaderData, MapSize, (void**) &Map);
+            EFI_STATUS status = SystemTable->BootServices->GetMemoryMap(&MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+            if (status == EFI_SUCCESS){
+                break;
+            }else{
+                SystemTable->BootServices->FreePool(Map);
+            }
+        }
 	}
 
 	EFI_CONFIGURATION_TABLE* configTable = SystemTable->ConfigurationTable;
